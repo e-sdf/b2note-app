@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "app/*": ["app/*"],
+      "core/*": ["b2note-core/src/core/*"],
+      "client/*": ["b2note-client-lib/src/client/*"]
+    },
+    "target": "es6",
+    "sourceMap": true,
+    "lib": ["dom", "dom.iterable", "es6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "es6",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "noEmit": false,
+    "jsx": "react"
+  },
+  "include": ["app/**/*"],
+  "exclude": ["node_modules"]
+}

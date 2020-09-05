@@ -1,2 +1,2 @@
-# b2note-ui
-Central UI for B2NOTE
+# semaphora-chrome
+Semaphora Chrome Extension

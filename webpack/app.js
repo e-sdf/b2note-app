@@ -15,7 +15,6 @@ module.exports = {
     alias: {
       "app": path.resolve(__dirname, "../app/"),
       "core": path.resolve(__dirname, "../b2note-core/src/core/"),
-      "client": path.resolve(__dirname, "../b2note-client-lib/src/client/"),
       "react": "preact/compat",
       "react-dom": "preact/compat"
     }

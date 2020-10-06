@@ -2,15 +2,17 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "app/config";
-import type { Token } from "client/api/http";
-import { AuthProvidersEnum } from "client/api/auth/defs";
-import * as auth from "client/api/auth/auth";
-import * as profileApi from "client/api/profile";
-import { Context } from "client/context";
-import * as icons from "client/components/icons";
+import type { Token } from "app/api/http";
+import { AuthProvidersEnum } from "app/api/auth/defs";
+import * as auth from "app/api/auth/auth";
+import * as profileApi from "app/api/profile";
+import { Context } from "app/context";
+import * as icons from "app/components/icons";
 import { PagesEnum } from "app/pages/pages";
 import AuthProviderSelectionPage from "app/pages/login";
-import ProfilePage from "app/pages/profile/view";
+import AnnotatorPage from "app/pages/annotator/view";
+import CustomOntologiesPage from "app/pages/customOntologies/view";
+import ProfilePage from "app/pages/profile";
 
 enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
 
@@ -19,7 +21,7 @@ interface Props {
 }
 
 function MainView(props: Props): React.FunctionComponentElement<Props> {
-  const [page, setPage] = React.useState(PagesEnum.PROFILE);
+  const [page, setPage] = React.useState(PagesEnum.ONTOLOGIES);
   const [context, setContext] = React.useState(props.context);
   const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
   const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | AuthProvidersEnum);
@@ -115,7 +117,13 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
             config={props.context.config}
             user={context.mbUser}
             updateProfileFn={() => retrieveProfile(authProvider, context.mbUser?.token ? context.mbUser.token : null)} authErrAction={() => loginPm()}/>
-        : <></>
+        : <></>,
+        [PagesEnum.ANNOTATOR]: () => <AnnotatorPage context={context} authErrAction={() => loginPm()}/>,
+        [PagesEnum.ONTOLOGIES]: () => 
+          <CustomOntologiesPage 
+            context={context}
+            profileChangedHandler={() => retrieveProfile(authProvider, context.mbUser?.token || null)}
+            authErrAction={() => loginPm()}/>
     });
   }
 
@@ -123,8 +131,22 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
     const activeFlag = (p: PagesEnum): string => p === page ? " active" : "";
 
     return (
-      <nav className="navbar navbar-expand pr-0">
+      <nav className="navbar navbar-expand-md navbar-light bg-light pr-0">
         <ul className="navbar-nav" style={{width: "100%"}}>
+          <li className="nav-item">
+            <a
+              className={"nav-link" + activeFlag(PagesEnum.ANNOTATOR)} href="#"
+              onClick={() => setPage(PagesEnum.ANNOTATOR)}>
+              Annotator
+            </a>
+          </li>
+          <li className="nav-item">
+            <a
+              className={"nav-link" + activeFlag(PagesEnum.ONTOLOGIES)} href="#"
+              onClick={() => setPage(PagesEnum.ONTOLOGIES)}>
+              Custom Ontologies
+            </a>
+          </li>
           <li className="nav-item ml-auto">
             <a
               className={"nav-link" + activeFlag(PagesEnum.PROFILE)} href="#"

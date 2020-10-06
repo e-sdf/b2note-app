@@ -1,53 +1,69 @@
 import _ from "lodash";
 import { $enum } from "ts-enum-util";
 import * as React from "react";
-import type { ConfRec } from "client/config";
-import type { AuthUser } from "client/context";
-import type { AuthErrAction } from "client/api/http";
-import type { UserProfile } from "core/user";
+import {ApiComponent} from "app/components/defs";
+import type { Ontology } from "core/ontologyRegister";
 import { OntologyFormat } from "core/ontologyRegister";
-import * as api from "client/api/profile";
-import Alert from "client/components/alert";
-import SpinningWheel from "client/components/spinningWheel";
-import * as icons from "client/components/icons";
+import * as oApi from "app/api/ontologyRegister";
+import OntologiesList from "./list";
+import OntologyDetailView from "./detailView";
+import Alert from "app/components/alert";
+import SpinningWheel from "app/components/spinningWheel";
+import * as icons from "app/components/icons";
 
-interface Props {
-  config: ConfRec;
-  user: AuthUser;
-  authErrAction: AuthErrAction;
+interface Props extends ApiComponent {
+  profileChangedHandler: () => void;
 }
 
-export default function CustomOntologies(props: Props): React.FunctionComponentElement<Props> {
+export default function CustomOntologiesPage(props: Props): React.FunctionComponentElement<Props> {
+  const [ontologies, setOntologies] = React.useState([] as Array<Ontology>);
   const [uploadFromDiskDialog, setUploadFromDiskDialog] = React.useState(false);
   const [uploadFromUrlDialog, setUploadFromUrlDialog] = React.useState(false);
   const [urlForUploading, setUrlForUploading] = React.useState("");
   const [importFormat, setImportFormat] = React.useState(OntologyFormat.TURTLE);
+  const [detailRequest, setDetailRequest] = React.useState(null as Ontology|null);
   const [loading, setLoading] = React.useState(false);
-  const [successMessage, setSuccessMessage] = React.useState(null as string|null);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
-  React.useEffect(() => setErrorMessage(null), [successMessage]);
+  const mbUser = props.context.mbUser;
+
+  function loadOntologies(): void {
+    setLoading(true);
+    oApi.loadOntologies().then(
+      onts => { setOntologies(onts); setLoading(false); },
+      err => setErrorMessage(err)
+    );
+  }
+
+  React.useEffect(() => loadOntologies(), []);
+
   React.useEffect(() => { if (loading) { setErrorMessage(null); } }, [loading]);
 
   function uploadFromUrl(): void {
-    setLoading(true);
-    api.importOntologyPm(props.config, urlForUploading, importFormat, props.user.token, props.authErrAction).then(
-      res => {
-        setLoading(false);
-        console.log(res);
-      },
-      err => { setLoading(false); setErrorMessage("Error downloading ontology: " + err); }
-    );
+    if (mbUser) {
+      setLoading(true);
+      oApi.importOntology(mbUser, urlForUploading, importFormat, props.authErrAction).then(
+        () => {
+          setLoading(false);
+          setUploadFromUrlDialog(false);
+          setUrlForUploading("");
+          loadOntologies();
+        },
+        err => { setLoading(false); setErrorMessage("Error downloading ontology: " + err); }
+      );
+    }
   }
 
   function renderAddMenuButton(): React.ReactElement {
     return (
       <div className="d-flex flex-row">
         <button type="button" className="btn btn-primary"
+          disabled={mbUser == null}
           onClick={() => setUploadFromDiskDialog(true)}>
           <icons.DiskIcon/> Import Ontology from Disk
         </button>
         <button type="button" className="btn btn-primary ml-2"
+          disabled={mbUser == null}
           onClick={() => setUploadFromUrlDialog(true)}>
           <icons.UploadIcon/> Import Ontology from URL
         </button>
@@ -113,17 +129,33 @@ export default function CustomOntologies(props: Props): React.FunctionComponentE
   }
 
   return (
-    <div className="container mt-2">
-      {!uploadFromUrlDialog && !uploadFromDiskDialog ?
-        renderAddMenuButton()
-      : uploadFromDiskDialog ?
-        renderUploadFromDiskDialog()
-      : renderUploadFromUrlDialog()}
-      <div className="d-flex flex-row justify-content-center mt-2">
-        <SpinningWheel show={loading}/>
-        <Alert type="success" message={successMessage} closedHandler={() => setSuccessMessage(null)}/>
-        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
-      </div>
+    <div className="container">
+      {detailRequest ?
+        <OntologyDetailView ontology={detailRequest} closeHandler={() => setDetailRequest(null)}/>
+      :
+        <>
+          <OntologiesList
+            context={props.context}
+            ontologies={ontologies}
+            errorHandler={err => setErrorMessage(err)}
+            loadingHandler={flag => setLoading(flag)}
+            ontologyChangedHandler={() => loadOntologies()}
+            profileChangedHandler={() => props.profileChangedHandler()}
+            detailRequestHandler={o => setDetailRequest(o)}
+            authErrAction={props.authErrAction}/>
+          <div className="d-flex flex-row justify-content-center mt-2">
+            <SpinningWheel show={loading}/>
+            <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+          </div>
+          <div className="container mt-2">
+            {!uploadFromUrlDialog && !uploadFromDiskDialog ?
+              renderAddMenuButton()
+            : uploadFromDiskDialog ?
+              renderUploadFromDiskDialog()
+            : renderUploadFromUrlDialog()}
+          </div>
+        </>
+      }
     </div>
   );
 }

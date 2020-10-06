@@ -1,4 +1,6 @@
 export enum PagesEnum {
   LOGIN = "login",
-  PROFILE = "profile"
+  ANNOTATOR = "annotator",
+  PROFILE = "profile",
+  ONTOLOGIES = "ontologies"
 }

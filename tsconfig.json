@@ -4,7 +4,6 @@
     "paths": {
       "app/*": ["app/*"],
       "core/*": ["b2note-core/src/core/*"],
-      "client/*": ["b2note-client-lib/src/client/*"]
     },
     "target": "es6",
     "sourceMap": true,

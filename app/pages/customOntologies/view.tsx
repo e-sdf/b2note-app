@@ -1,17 +1,19 @@
 import _ from "lodash";
 import { $enum } from "ts-enum-util";
 import * as React from "react";
-import {ApiComponent} from "app/components/defs";
 import type { Ontology } from "core/ontologyRegister";
 import { OntologyFormat } from "core/ontologyRegister";
 import * as oApi from "app/api/ontologyRegister";
+import { SysContext, AppContext } from "app/context";
 import OntologiesList from "./list";
 import OntologyDetailView from "./detailView";
 import Alert from "app/components/alert";
 import SpinningWheel from "app/components/spinningWheel";
 import * as icons from "app/components/icons";
 
-interface Props extends ApiComponent {
+interface Props {
+  sysContext: SysContext;
+  appContext: AppContext;
   profileChangedHandler: () => void;
 }
 
@@ -25,31 +27,33 @@ export default function CustomOntologiesPage(props: Props): React.FunctionCompon
   const [loading, setLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
-  const mbUser = props.context.mbUser;
+  const mbUser = props.appContext.mbUser;
 
   function loadOntologies(): void {
-    setLoading(true);
-    oApi.loadOntologies().then(
-      onts => { setOntologies(onts); setLoading(false); },
-      err => setErrorMessage(err)
-    );
+    if (mbUser) {
+      setLoading(true);
+      oApi.loadOntologies(mbUser, props.appContext.authErrAction).then(
+        onts => { setOntologies(onts); setLoading(false); },
+        err => setErrorMessage(err)
+      );
+    }
   }
 
-  React.useEffect(() => loadOntologies(), []);
+  React.useEffect(() => loadOntologies(), [mbUser]);
 
   React.useEffect(() => { if (loading) { setErrorMessage(null); } }, [loading]);
 
   function uploadFromUrl(): void {
     if (mbUser) {
       setLoading(true);
-      oApi.importOntology(mbUser, urlForUploading, importFormat, props.authErrAction).then(
+      oApi.importOntology(mbUser, urlForUploading, importFormat, props.appContext.authErrAction).then(
         () => {
           setLoading(false);
           setUploadFromUrlDialog(false);
           setUrlForUploading("");
           loadOntologies();
         },
-        err => { setLoading(false); setErrorMessage("Error downloading ontology: " + err); }
+        err => { setLoading(false); setErrorMessage("Import error: " + err); }
       );
     }
   }
@@ -135,14 +139,14 @@ export default function CustomOntologiesPage(props: Props): React.FunctionCompon
       :
         <>
           <OntologiesList
-            context={props.context}
+            sysContext={props.sysContext} 
+            appContext={props.appContext}
             ontologies={ontologies}
             errorHandler={err => setErrorMessage(err)}
             loadingHandler={flag => setLoading(flag)}
             ontologyChangedHandler={() => loadOntologies()}
             profileChangedHandler={() => props.profileChangedHandler()}
-            detailRequestHandler={o => setDetailRequest(o)}
-            authErrAction={props.authErrAction}/>
+            detailRequestHandler={o => setDetailRequest(o)}/>
           <div className="d-flex flex-row justify-content-center mt-2">
             <SpinningWheel show={loading}/>
             <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>

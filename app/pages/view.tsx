@@ -2,11 +2,11 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "app/config";
-import type { Token } from "app/api/http";
+import type { SysContext, AppContext } from "app/context";
+import type { Token } from "core/http";
 import { AuthProvidersEnum } from "app/api/auth/defs";
 import * as auth from "app/api/auth/auth";
 import * as profileApi from "app/api/profile";
-import { Context } from "app/context";
 import * as icons from "app/components/icons";
 import { PagesEnum } from "app/pages/pages";
 import AuthProviderSelectionPage from "app/pages/login";
@@ -17,22 +17,22 @@ import ProfilePage from "app/pages/profile";
 enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
 
 interface Props {
-  context: Context;
+  sysContext: SysContext;
 }
 
 function MainView(props: Props): React.FunctionComponentElement<Props> {
   const [page, setPage] = React.useState(PagesEnum.ONTOLOGIES);
-  const [context, setContext] = React.useState(props.context);
+  const [appContext, setAppContext] = React.useState({ mbUser: null, authErrAction: loginPm } as AppContext);
   const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
   const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | AuthProvidersEnum);
   const [loginState, setLoginState] = React.useState(LoginStateEnum.NOT_LOGGED);
 
   function retrieveProfile(provider: AuthProvidersEnum|null, token: Token|null): void {
     if (provider && token) {
-      profileApi.getUserProfilePm(config, token, () => auth.loginPm(context, provider)).then(
+      profileApi.getUserProfilePm(config, token, () => auth.loginPm(props.sysContext, provider)).then(
         profile => {
           setLoginState(LoginStateEnum.LOGGED);
-          setContext({ ...context, mbUser: { token, profile }});
+          setAppContext({ ...appContext, mbUser: { token, profile }});
         },
         err => {
           setLoginState(LoginStateEnum.ERROR);
@@ -52,7 +52,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
 
       setLoginState(LoginStateEnum.LOGGING);
       if (chosenAuthProvider) {
-        auth.loginPm(props.context, chosenAuthProvider, cancel).then(
+        auth.loginPm(props.sysContext, chosenAuthProvider, cancel).then(
           token => {
             retrieveProfile(chosenAuthProvider, token);
             resolve(token);
@@ -71,7 +71,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
   }
 
   function firstLogin(): void {
-    context.authStorage.retrieve().then(
+    props.sysContext.authStorage.retrieve().then(
       sAuth => {
         setLoginState(LoginStateEnum.LOGGING);
         setAuthProvider(sAuth.provider);
@@ -82,9 +82,9 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
   }
 
   function logout(): void {
-    context.authStorage.delete().then(
+    props.sysContext.authStorage.delete().then(
       () => {
-      setContext({ ...context, mbUser: null });
+      setAppContext({ ...appContext, mbUser: null });
       setLoginState(LoginStateEnum.NOT_LOGGED);
       setAuthProvider(null);
       setChosenAuthProvider(null);
@@ -112,18 +112,21 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
     return matchSwitch(page, {
       [PagesEnum.LOGIN]: () => <AuthProviderSelectionPage config={config} selectedHandler={(p) => setChosenAuthProvider(p)}/>,
       [PagesEnum.PROFILE]: () =>
-        context.mbUser ?
+        appContext.mbUser ?
           <ProfilePage
-            config={props.context.config}
-            user={context.mbUser}
-            updateProfileFn={() => retrieveProfile(authProvider, context.mbUser?.token ? context.mbUser.token : null)} authErrAction={() => loginPm()}/>
+            config={props.sysContext.config}
+            user={appContext.mbUser}
+            updateProfileFn={() => retrieveProfile(authProvider, appContext.mbUser?.token ? appContext.mbUser.token : null)} authErrAction={() => loginPm()}/>
         : <></>,
-        [PagesEnum.ANNOTATOR]: () => <AnnotatorPage context={context} authErrAction={() => loginPm()}/>,
+        [PagesEnum.ANNOTATOR]: () => 
+          <AnnotatorPage 
+            sysContext={props.sysContext}
+            appContext={appContext}/>,
         [PagesEnum.ONTOLOGIES]: () => 
           <CustomOntologiesPage 
-            context={context}
-            profileChangedHandler={() => retrieveProfile(authProvider, context.mbUser?.token || null)}
-            authErrAction={() => loginPm()}/>
+            sysContext={props.sysContext}
+            appContext={appContext}
+            profileChangedHandler={() => retrieveProfile(authProvider, appContext.mbUser?.token || null)}/>
     });
   }
 
@@ -150,7 +153,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
           <li className="nav-item ml-auto">
             <a
               className={"nav-link" + activeFlag(PagesEnum.PROFILE)} href="#"
-              data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? context.mbUser.profile.email : "Login"}
+              data-toggle="tooltip" data-placement="bottom" title={appContext.mbUser ? appContext.mbUser.profile.email : "Login"}
               onClick={() =>
                 matchSwitch(loginState, {
                   [LoginStateEnum.NOT_LOGGED]: () => firstLogin(),
@@ -162,7 +165,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
                 [LoginStateEnum.NOT_LOGGED]: () => <span>Login</span>,
                 [LoginStateEnum.LOGGING]: () => <span>Logging in...</span>,
                 [LoginStateEnum.LOGGED]:
-                  () => <span><icons.UserIcon/> {context.mbUser?.profile.personName || ""}</span>,
+                  () => <span><icons.UserIcon/> {appContext.mbUser?.profile.personName || ""}</span>,
                 [LoginStateEnum.ERROR]:
                   () => <span style={{fontSize: "90%"}}>Login error, try again</span>
               })}
@@ -215,10 +218,10 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
   );
 }
 
-export default function render(context: Context): void {
+export default function render(sysContext: SysContext): void {
   const container = document.getElementById("b2note-app");
   if (container) {
-    ReactDOM.render(<MainView context={context}/>, container);
+    ReactDOM.render(<MainView sysContext={sysContext}/>, container);
   } else {
     console.error("[B2NOTE APP]: DOM element missing");
   }

@@ -1,5 +1,6 @@
-import { get, post, patch, del, Token, AuthErrAction } from "./http";
-import type { ConfRec } from "../config";
+import type { Token, AuthErrAction } from "core/http";
+import { get, post, patch, del } from "core/http";
+import type { ConfRec } from "app/config";
 import type { UserProfile } from "core/user";
 import { usersUrl, customOntologyUrl } from "core/user";
 import { Ontology } from "core/ontologyRegister";

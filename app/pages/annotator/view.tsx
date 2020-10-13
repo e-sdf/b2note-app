@@ -1,7 +1,12 @@
 import * as React from "react";
-import {ApiComponent} from "app/components/defs";
+import type { SysContext, AppContext } from "app/context";
 
-export default function AnnotatorPage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
+interface Props {
+  sysContext: SysContext;
+  appContext: AppContext;
+}
+
+export default function AnnotatorPage(props: Props): React.FunctionComponentElement<Props> {
   return (
     <div className="container-fluid">
       Annotator

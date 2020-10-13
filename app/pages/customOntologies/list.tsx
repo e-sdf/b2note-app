@@ -1,13 +1,15 @@
 import _, { isSymbol } from "lodash";
 import * as React from "react";
-import {ApiComponent} from "app/components/defs";
 import type { Ontology } from "core/ontologyRegister";
 import * as oApi from "app/api/ontologyRegister";
 import * as userApi from "app/api/profile";
+import { SysContext, AppContext } from "app/context";
 import { renderDeleteConfirmation } from "app/components/deleteConfirmation";
 import * as icons from "app/components/icons";
 
-interface Props extends ApiComponent {
+interface Props {
+  sysContext: SysContext;
+  appContext: AppContext;
   ontologies: Array<Ontology>;
   errorHandler: (err: string) => void;
   loadingHandler: (loading: boolean) => void;
@@ -20,24 +22,22 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
   const [userOntologies, setUserOntologies] = React.useState([] as Array<Ontology>);
   const [pendingDelete, setPendingDelete] = React.useState(null as Ontology|null);
 
-  const mbUser = props.context.mbUser;
+  const mbUser = props.appContext.mbUser;
 
   React.useEffect(
     () => {
       if (mbUser) {
-        userApi.getCustomOntologies(props.context.config, mbUser.token, props.authErrAction)
+        userApi.getCustomOntologies(props.sysContext.config, mbUser.token, props.appContext.authErrAction)
         .then(setUserOntologies)
       }
     },
     [mbUser]
   );
 
-  React.useEffect(() => console.log(pendingDelete), [pendingDelete])
-
   function addOntologyToProfile(o: Ontology): void {
     if (mbUser) {
       props.loadingHandler(true);
-      userApi.addCustomOntology(props.context.config, o, mbUser.token, props.authErrAction).then(
+      userApi.addCustomOntology(props.sysContext.config, o, mbUser.token, props.appContext.authErrAction).then(
         () => {
           props.loadingHandler(false);
           props.profileChangedHandler();
@@ -50,7 +50,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
   function removeOntologyFromProfile(o: Ontology): void {
     if (mbUser) {
       props.loadingHandler(true);
-      userApi.removeCustomOntology(props.context.config, o, mbUser.token, props.authErrAction).then(
+      userApi.removeCustomOntology(props.sysContext.config, o, mbUser.token, props.appContext.authErrAction).then(
         () => {
           props.loadingHandler(false);
           props.profileChangedHandler();
@@ -63,7 +63,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
   function deleteOntology(o: Ontology): void {
     if (mbUser) {
       props.loadingHandler(true);
-      oApi.deleteOntology(mbUser, o, props.authErrAction).then(
+      oApi.deleteOntology(mbUser, o, props.appContext.authErrAction).then(
         () => {
           props.loadingHandler(false);
           setPendingDelete(null);

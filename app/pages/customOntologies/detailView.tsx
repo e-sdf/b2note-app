@@ -9,7 +9,7 @@ interface Props {
 
 export default function DetailView(props: Props): React.FunctionComponentElement<Props> {
   const ontology = props.ontology;
-
+  
   return (
     <div className="container">
       <div className="card">
@@ -22,8 +22,8 @@ export default function DetailView(props: Props): React.FunctionComponentElement
         </div>
         <div className="card-body" style={{height: "calc(100vh - 270px)", overflowY: "scroll"}}>
           {ontology.terms.map(oTerm =>
-            <div key={oTerm.labels} className="m-2">
-              {oTerm.labels}
+            <div key={oTerm.label} className="m-2">
+              {oTerm.label}
             </div>
           )}
         </div>

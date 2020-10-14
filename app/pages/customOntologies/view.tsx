@@ -52,20 +52,21 @@ export default function CustomOntologiesPage(props: Props): React.FunctionCompon
           setUploadFromUrlDialog(false);
           setUrlForUploading("");
           loadOntologies();
+          props.profileChangedHandler();
         },
         err => { setLoading(false); setErrorMessage("Import error: " + err); }
       );
     }
   }
 
+        // <button type="button" className="btn btn-primary"
+        //   disabled={mbUser == null}
+        //   onClick={() => setUploadFromDiskDialog(true)}>
+        //   <icons.DiskIcon/> Import Ontology from Disk
+        // </button>
   function renderAddMenuButton(): React.ReactElement {
     return (
       <div className="d-flex flex-row">
-        <button type="button" className="btn btn-primary"
-          disabled={mbUser == null}
-          onClick={() => setUploadFromDiskDialog(true)}>
-          <icons.DiskIcon/> Import Ontology from Disk
-        </button>
         <button type="button" className="btn btn-primary ml-2"
           disabled={mbUser == null}
           onClick={() => setUploadFromUrlDialog(true)}>

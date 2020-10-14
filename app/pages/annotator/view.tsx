@@ -9,7 +9,7 @@ interface Props {
 export default function AnnotatorPage(props: Props): React.FunctionComponentElement<Props> {
   return (
     <div className="container-fluid">
-      Annotator
+      <img src="https://marcellusdrilling.com/wp-content/uploads/2016/10/under-construction.png"/>
     </div>
   );
 }

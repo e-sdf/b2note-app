@@ -3,7 +3,7 @@
     "baseUrl": "./",
     "paths": {
       "app/*": ["app/*"],
-      "core/*": ["b2note-core/src/core/*"],
+      "core/*": ["b2note-core/src/core/*"]
     },
     "target": "es6",
     "sourceMap": true,

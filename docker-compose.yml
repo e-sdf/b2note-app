@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  b2note-widget:
+  b2note-app:
     image: b2note/b2note-app:latest
     restart: always
     network_mode: host

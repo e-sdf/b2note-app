@@ -4,7 +4,7 @@
   "description": "B2NOTE - Central UI Application",
   "private": "true",
   "scripts": {
-    "dev-server": "webpack-dev-server --open --config webpack.dev.js",
+    "dev-server": "webpack-dev-server --open --config webpack/app.dev.js",
     "start-dev": "cd server; node -r dotenv/config server",
     "build": "scripts/build.sh",
     "deploy": "scripts/git-tag.sh; scripts/docker-build.sh; scripts/docker-tag.sh; scripts/docker-push.sh",
@@ -48,5 +48,15 @@
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.1.4",
     "xmlbuilder": "^15.1.1"
+  },
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
   }
 }

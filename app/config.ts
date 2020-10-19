@@ -16,9 +16,9 @@ export const config: ConfRec = {
   apiServerUrl: confRec?.apiServerUrl ? confRec.apiServerUrl : "http://localhost:3060",
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
   solrUrl: confRec?.solrUrl ? confRec.solrUrl : "https://b2note.eudat.eu/solr/b2note_index/select",
-  imgPath: "img/",
+  imgPath: "/app/img/",
   name: "B2NOTE Central UI",
-  version: "v0.0.1",
+  version: "v0.1.0",
   homepage: "https://b2note.bsc.es"
 };
 

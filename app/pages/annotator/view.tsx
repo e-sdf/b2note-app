@@ -1,6 +1,6 @@
-import * as React from 'react'
-import type { SysContext, AppContext } from 'app/context'
-import { FormEvent } from 'react'
+import * as React from "react";
+import type { SysContext, AppContext } from "app/context";
+import { FormEvent } from "react";
 
 interface Props {
   sysContext: SysContext;
@@ -8,15 +8,15 @@ interface Props {
 }
 
 export default function AnnotatorPage(props: Props): React.FunctionComponentElement<Props> {
-  const [pageUrlInputValue, setPageUrlInputValue] = React.useState('')
-  const [pageUrl, setPageUrl] = React.useState('')
+  const [pageUrlInputValue, setPageUrlInputValue] = React.useState("");
+  const [pageUrl, setPageUrl] = React.useState("");
 
   function load(event: FormEvent) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (pageUrlInputValue.length > 0) {
-      const annotateUrl = `${props.sysContext.config.apiServerUrl}${props.sysContext.config.apiPath}/annotator?url=${encodeURIComponent(pageUrlInputValue)}`
-      setPageUrl(annotateUrl)
+      const annotateUrl = `${props.sysContext.config.apiServerUrl}${props.sysContext.config.apiPath}/annotator?url=${encodeURIComponent(pageUrlInputValue)}`;
+      setPageUrl(annotateUrl);
     }
   }
 
@@ -33,15 +33,15 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
         </div>
         <button type="submit" onClick={load} className="btn btn-primary">Load</button>
       </form>
-    )
+    );
   }
 
   function renderPage() {
-    return ( <iframe src={pageUrl} />)
+    return ( <iframe src={pageUrl} />);
   }
 
   function renderAnnotator() {
-    return (<span>Annotator</span>)
+    return (<span>Annotator</span>);
   }
 
   return (
@@ -60,5 +60,5 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
         </div>
       </div>
     </div>
-  )
+  );
 }

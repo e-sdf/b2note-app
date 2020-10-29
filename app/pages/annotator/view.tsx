@@ -1,6 +1,8 @@
 import * as React from "react";
-import type { SysContext, AppContext } from "app/context";
-import { FormEvent } from "react";
+import type {SysContext, AppContext} from "app/context";
+import {FormEvent} from "react";
+import _ from "lodash";
+import SpinningWheel from "app/components/spinningWheel";
 
 interface Props {
   sysContext: SysContext;
@@ -10,6 +12,8 @@ interface Props {
 export default function AnnotatorPage(props: Props): React.FunctionComponentElement<Props> {
   const [pageUrlInputValue, setPageUrlInputValue] = React.useState("");
   const [pageUrl, setPageUrl] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [key, setKey] = React.useState(0);
 
   function load(event: FormEvent) {
     event.preventDefault();
@@ -17,8 +21,27 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
     if (pageUrlInputValue.length > 0) {
       const annotateUrl = `${props.sysContext.config.apiServerUrl}${props.sysContext.config.apiPath}/annotator?url=${encodeURIComponent(pageUrlInputValue)}`;
       setPageUrl(annotateUrl);
+      setKey(key + 1);
+      setIsLoading(true);
     }
   }
+
+
+  React.useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const type = _.get(event, "data.type");
+
+      if (type === "iframe.loaded") {
+        setIsLoading(false);
+      }
+    };
+
+    window.addEventListener("message", handler);
+
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  });
 
   function renderNavigation() {
     return (
@@ -28,6 +51,7 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
             type="text"
             value={pageUrlInputValue}
             onChange={event => setPageUrlInputValue(event.target.value)}
+            placeholder="Enter the page URL"
             className="form-control"
           />
         </div>
@@ -37,7 +61,8 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
   }
 
   function renderPage() {
-    return ( <iframe src={pageUrl} />);
+    return (pageUrl.length > 0 ?
+      <iframe key={key} src={pageUrl} style={{display: isLoading ? "none" : "block"}}/> : <></>);
   }
 
   function renderAnnotator() {
@@ -52,7 +77,8 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
         </div>
       </div>
       <div className="row row-page">
-        <div className="col col-9">
+        <div className="col col-9 d-flex align-items-center justify-content-center">
+          {<SpinningWheel show={isLoading}/>}
           {renderPage()}
         </div>
         <div className="col col-3 bg-light">

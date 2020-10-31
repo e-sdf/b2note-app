@@ -1,6 +1,7 @@
 {
   "name": "b2note-app",
   "version": "0.1.0",
+  "build": "2",
   "description": "B2NOTE - Central UI Application",
   "private": "true",
   "scripts": {

@@ -4,6 +4,8 @@ import {FormEvent} from "react";
 import _ from "lodash";
 import Alert from "app/components/alert";
 import SpinningWheel from "app/components/spinningWheel";
+import {FormBuilder} from "app/utils/formBuilder";
+import {config} from "app/config";
 
 interface Props {
   sysContext: SysContext;
@@ -22,6 +24,7 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
   const [pageUrl, setPageUrl] = React.useState("");
   const [key, setKey] = React.useState(0);
   const [annotatorState, setAnnotatorState] = React.useState({kind: "initial"} as AnnotatorState);
+  const [widgetOpen, setWidgetOpen] = React.useState(false);
 
   const isLoading = annotatorState.kind == "loading";
   const isSuccess = annotatorState.kind == "success";
@@ -38,17 +41,60 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
     }
   }
 
+  function submitForm(subject: string, extraParams: Record<string, string> = {}): void {
+    const formBuilder = new FormBuilder(config.widgetUrl, "post", "annotator")
+      .withInput("pid_tofeed", pageUrlInputValue)
+      .withInput("subject_tofeed", subject);
+
+    Object.entries(extraParams).forEach(([name, value]) => {
+      formBuilder.withInput(name, value);
+    });
+
+    const form = formBuilder.getForm();
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    setWidgetOpen(true);
+  }
+
 
   React.useEffect(() => {
     const handler = (event: MessageEvent) => {
       const type = _.get(event, "data.type");
 
-      if (type === "iframe.loaded") {
-        setAnnotatorState({kind: "success"});
-      } else if (type === "iframe.error") {
-        setAnnotatorState({kind: "error", message: _.get(event, "data.error", "Unable to open the page")});
-      }
+      switch (type) {
+        case "iframe.loaded":
+          setAnnotatorState({kind: "success"});
+          break;
 
+        case "iframe.error":
+          setAnnotatorState({kind: "error", message: _.get(event, "data.error", "Unable to open the page")});
+          break;
+
+        case "iframe.annotate.page":
+          submitForm(pageUrlInputValue);
+          break;
+
+
+        case "iframe.annotate.selection":
+          submitForm(pageUrlInputValue, {
+            "xPath_tofeed": _.get(event, "data.xPath", ""),
+            "textContent_tofeed": _.get(event, "data.textContent", ""),
+            "startOffset_tofeed": _.get(event, "data.startOffset", ""),
+            "endOffset_tofeed": _.get(event, "data.endOffset", ""),
+          });
+          break;
+
+        case "iframe.annotate.link":
+          submitForm(_.get(event, "data.href"));
+          break;
+
+        case "iframe.annotate.image":
+          submitForm(_.get(event, "data.src"));
+          break;
+      }
     };
 
     window.addEventListener("message", handler);
@@ -81,7 +127,7 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
   }
 
   function renderAnnotator() {
-    return (<span>Annotator</span>);
+    return (<iframe name="annotator"/>);
   }
 
   function renderError() {
@@ -102,13 +148,13 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
       </div>
       <div className="row row-page">
         <div
-          className={`col ${isSuccess ? "col-9" : ""} ${isLoading ? "d-flex align-items-center justify-content-center" : ""}`}
+          className={`col ${isLoading ? "d-flex align-items-center justify-content-center" : ""}`}
         >
           {<SpinningWheel show={isLoading}/>}
           {renderError()}
           {renderPage()}
         </div>
-        <div className="col col-3 bg-light" style={{display: isSuccess ? "block" : "none"}}>
+        <div className="col-annotator" style={{display: widgetOpen ? "block" : "none"}}>
           {renderAnnotator()}
         </div>
       </div>

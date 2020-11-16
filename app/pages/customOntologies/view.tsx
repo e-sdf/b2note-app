@@ -1,7 +1,6 @@
-import _ from "lodash";
 import { $enum } from "ts-enum-util";
 import * as React from "react";
-import type { Ontology } from "core/ontologyRegister";
+import type { OntologyMeta } from "core/ontologyRegister";
 import { OntologyFormat } from "core/ontologyRegister";
 import * as oApi from "app/api/ontologyRegister";
 import { SysContext, AppContext } from "app/context";
@@ -18,12 +17,12 @@ interface Props {
 }
 
 export default function CustomOntologiesPage(props: Props): React.FunctionComponentElement<Props> {
-  const [ontologies, setOntologies] = React.useState([] as Array<Ontology>);
+  const [ontologies, setOntologies] = React.useState([] as Array<OntologyMeta>);
   const [uploadFromDiskDialog, setUploadFromDiskDialog] = React.useState(false);
   const [uploadFromUrlDialog, setUploadFromUrlDialog] = React.useState(false);
   const [urlForUploading, setUrlForUploading] = React.useState("");
   const [importFormat, setImportFormat] = React.useState(OntologyFormat.TURTLE);
-  const [detailRequest, setDetailRequest] = React.useState(null as Ontology|null);
+  const [detailRequest, setDetailRequest] = React.useState(null as OntologyMeta|null);
   const [loading, setLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
@@ -32,7 +31,7 @@ export default function CustomOntologiesPage(props: Props): React.FunctionCompon
   function loadOntologies(): void {
     if (mbUser) {
       setLoading(true);
-      oApi.loadOntologies(mbUser, props.appContext.authErrAction).then(
+      oApi.getCustomOntologiesMetas(mbUser, props.appContext.authErrAction).then(
         onts => { setOntologies(onts); setLoading(false); },
         err => setErrorMessage(err)
       );
@@ -89,7 +88,7 @@ export default function CustomOntologiesPage(props: Props): React.FunctionCompon
         <div className="form-group">
           {$enum(OntologyFormat).getKeys().map(
             format =>
-              <div className="form-check">
+              <div key={format} className="form-check">
                 <label>
                   <input
                     type="radio"
@@ -136,7 +135,10 @@ export default function CustomOntologiesPage(props: Props): React.FunctionCompon
   return (
     <div className="container">
       {detailRequest ?
-        <OntologyDetailView ontology={detailRequest} closeHandler={() => setDetailRequest(null)}/>
+        <OntologyDetailView 
+          appContext={props.appContext}
+          ontologyMeta={detailRequest}
+          closeHandler={() => setDetailRequest(null)}/>
       :
         <>
           <OntologiesList

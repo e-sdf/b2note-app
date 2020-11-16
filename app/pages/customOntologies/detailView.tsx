@@ -1,31 +1,67 @@
 import _ from "lodash";
-import {Ontology} from "core/ontologyRegister";
 import * as React from "react";
+import { AppContext } from "app/context";
+import { OntologyMeta, Ontology } from "core/ontologyRegister";
+import * as oApi from "app/api/ontologyRegister";
+import Alert from "app/components/alert";
+import SpinningWheel from "app/components/spinningWheel";
 
 interface Props {
-  ontology: Ontology;
+  appContext: AppContext;
+  ontologyMeta: OntologyMeta;
   closeHandler: () => void;
 }
 
 export default function DetailView(props: Props): React.FunctionComponentElement<Props> {
-  const ontology = props.ontology;
+  const [ontology, setOntology] = React.useState(null as Ontology|null);
+  const [loading, setLoading] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
+  const mbUser = props.appContext.mbUser;
+  const authErrAction = props.appContext.authErrAction;
+
+  React.useEffect(
+    () => {
+      if (mbUser) {
+        setLoading(true);
+        oApi.getOntology(mbUser, props.ontologyMeta.id, authErrAction).then(
+          o => {
+            setOntology(o);
+            setLoading(false);
+          },
+          err => {
+            setLoading(false);
+            setErrorMessage(err);
+          }
+        )
+      }
+    },
+    [mbUser, props.ontologyMeta]
+  );
   
+  React.useEffect(() => { if (loading) { setErrorMessage(null); } }, [loading]);
+
   return (
     <div className="container">
       <div className="card">
         <div className="card-header">
-          {ontology.uri}
+          {props.ontologyMeta.uri}
           <button type="button" className="ml-auto close"
             onClick={() => props.closeHandler()}>
             <span>&times;</span>
           </button>
         </div>
         <div className="card-body" style={{height: "calc(100vh - 270px)", overflowY: "scroll"}}>
-          {ontology.terms.map(oTerm =>
-            <div key={oTerm.label} className="m-2">
-              {oTerm.label}
-            </div>
-          )}
+          {ontology ?
+            ontology.terms.map(oTerm =>
+              <div key={oTerm.label} className="m-2">
+                {oTerm.label}
+              </div>
+            )
+          : <></>}
+          <div className="d-flex flex-row justify-content-center mt-2">
+            <SpinningWheel show={loading}/>
+            <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+          </div>
         </div>
       </div>
     </div>

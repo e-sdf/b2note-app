@@ -4,6 +4,6 @@ module.exports = {
   mode: "development",
   devtool: "inline-source-map",
   devServer: {
-    contentBase: './server/public/app',
+    contentBase: './dist/server/public/app',
   }
 };

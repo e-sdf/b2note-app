@@ -9,6 +9,6 @@ services:
     environment:
       NODE_ENV: production
     env_file:
-      ./server/.env
+      ./dist/server/.env
     ports:
       - 3070:3070

@@ -3,7 +3,7 @@ import { get, post, patch, del } from "core/http";
 import type { ConfRec } from "app/config";
 import type { UserProfile } from "core/user";
 import { usersUrl, customOntologyUrl } from "core/user";
-import { Ontology } from "core/ontologyRegister";
+import { OntologyMeta } from "core/ontologyRegister";
 
 function getProfileUrl(config: ConfRec): string {
   return config.apiServerUrl + config.apiPath + usersUrl;
@@ -21,14 +21,14 @@ export function patchUserProfilePm(config: ConfRec, changes: Record<string, any>
   return patch<UserProfile>(getProfileUrl(config), { ...changes }, { token, authErrAction });
 }
 
-export function getCustomOntologies(config: ConfRec, token: Token, authErrAction: AuthErrAction): Promise<Array<Ontology>> {
+export function getCustomOntologies(config: ConfRec, token: Token, authErrAction: AuthErrAction): Promise<Array<OntologyMeta>> {
   return get(getCustomOntologiesUrl(config), {}, { token, authErrAction });
 }
 
-export function addCustomOntology(config: ConfRec, o: Ontology, token: Token, authErrAction: AuthErrAction): Promise<void> {
+export function addCustomOntology(config: ConfRec, o: OntologyMeta, token: Token, authErrAction: AuthErrAction): Promise<void> {
   return post(getCustomOntologiesUrl(config), { ontologyId: o.id }, { token, authErrAction });
 }
 
-export function removeCustomOntology(config: ConfRec, o: Ontology, token: Token, authErrAction: AuthErrAction): Promise<void> {
+export function removeCustomOntology(config: ConfRec, o: OntologyMeta, token: Token, authErrAction: AuthErrAction): Promise<void> {
   return del(getCustomOntologiesUrl(config) + "/" + o.id, { token, authErrAction });
 }

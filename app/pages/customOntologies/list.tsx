@@ -1,6 +1,5 @@
-import _, { isSymbol } from "lodash";
 import * as React from "react";
-import type { Ontology } from "core/ontologyRegister";
+import type { OntologyMeta } from "core/ontologyRegister";
 import * as oApi from "app/api/ontologyRegister";
 import * as userApi from "app/api/profile";
 import { SysContext, AppContext } from "app/context";
@@ -10,17 +9,17 @@ import * as icons from "app/components/icons";
 interface Props {
   sysContext: SysContext;
   appContext: AppContext;
-  ontologies: Array<Ontology>;
+  ontologies: Array<OntologyMeta>;
   errorHandler: (err: string) => void;
   loadingHandler: (loading: boolean) => void;
   ontologyChangedHandler: () => void;
   profileChangedHandler: () => void;
-  detailRequestHandler: (ontology: Ontology) => void;
+  detailRequestHandler: (ontology: OntologyMeta) => void;
 }
 
 export default function OntologiesList(props: Props): React.FunctionComponentElement<Props> {
-  const [userOntologies, setUserOntologies] = React.useState([] as Array<Ontology>);
-  const [pendingDelete, setPendingDelete] = React.useState(null as Ontology|null);
+  const [userOntologies, setUserOntologies] = React.useState([] as Array<OntologyMeta>);
+  const [pendingDelete, setPendingDelete] = React.useState(null as OntologyMeta|null);
 
   const mbUser = props.appContext.mbUser;
 
@@ -28,13 +27,13 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
     () => {
       if (mbUser) {
         userApi.getCustomOntologies(props.sysContext.config, mbUser.token, props.appContext.authErrAction)
-        .then(setUserOntologies)
+        .then(setUserOntologies);
       }
     },
     [mbUser]
   );
 
-  function addOntologyToProfile(o: Ontology): void {
+  function addOntologyToProfile(o: OntologyMeta): void {
     if (mbUser) {
       props.loadingHandler(true);
       userApi.addCustomOntology(props.sysContext.config, o, mbUser.token, props.appContext.authErrAction).then(
@@ -47,7 +46,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
     }
   }
 
-  function removeOntologyFromProfile(o: Ontology): void {
+  function removeOntologyFromProfile(o: OntologyMeta): void {
     if (mbUser) {
       props.loadingHandler(true);
       userApi.removeCustomOntology(props.sysContext.config, o, mbUser.token, props.appContext.authErrAction).then(
@@ -60,7 +59,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
     }
   }
 
-  function deleteOntology(o: Ontology): void {
+  function deleteOntology(o: OntologyMeta): void {
     if (mbUser) {
       props.loadingHandler(true);
       oApi.deleteOntology(mbUser, o, props.appContext.authErrAction).then(
@@ -74,7 +73,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
     }
   }
 
-  function renderOntologyRow(o: Ontology): React.ReactElement {
+  function renderOntologyRow(o: OntologyMeta): React.ReactElement {
     const isMyCustomOntology = userOntologies.some(o1 => o1.id === o.id);
 
     function renderOntologyActions(): React.ReactElement {
@@ -111,6 +110,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
 
     const bgCol = isMyCustomOntology ? "#afa" : "#eee";
 
+              // <div className="badge badge-info ml-2">{`${o.terms.length} terms`}</div>
     return (
       <tr key={o.uri} className="mt-1 mb-1" style={{backgroundColor: bgCol}}>
         {pendingDelete === o ?
@@ -118,8 +118,8 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
         :
           <>
             <td>
-              <a href={o.uri} target="_blank">{o.uri}</a>
-              <div className="badge badge-info ml-2">{`${o.terms.length} terms`}</div>
+              <a href={o.uri} target="_blank" rel="noreferrer">{o.uri}</a>
+              <div className="badge badge-info ml-2">{`${o.noOfTerms} terms`}</div>
             </td>
             <td>{renderOntologyActions()}</td>
           </>

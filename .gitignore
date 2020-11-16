@@ -61,5 +61,4 @@ typings/
 .next
 
 b2note-core/
-b2note-client-lib/
 dist/

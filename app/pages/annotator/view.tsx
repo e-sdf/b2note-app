@@ -34,24 +34,21 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
 
     if (pageUrlInputValue.length > 0) {
       const apiRoot = `${props.sysContext.config.apiServerUrl}${props.sysContext.config.apiPath}`;
-      const annotateUrl = `${apiRoot}/annotator?url=${encodeURIComponent(pageUrlInputValue)}`;
+      const annotateUrl = `${apiRoot}/annotator?url=${encodeURIComponent(pageUrlInputValue)}&root=1`;
       setPageUrl(annotateUrl);
       setKey(key + 1);
       setAnnotatorState({kind: "loading"});
+      setWidgetOpen(false);
     }
   }
 
-  function submitForm(subject: string, extraParams: Record<string, string> = {}): void {
-    const formBuilder = new FormBuilder(config.widgetUrl, "post", "annotator")
-      .withInput("pid_tofeed", pageUrlInputValue)
-      .withInput("subject_tofeed", subject);
-
-    Object.entries(extraParams).forEach(([name, value]) => {
+  function submitForm(data: Record<string, string> = {}): void {
+    const formBuilder = new FormBuilder(config.widgetUrl, "post", "annotator");
+    Object.entries(data).forEach(([name, value]) => {
       formBuilder.withInput(name, value);
     });
 
     const form = formBuilder.getForm();
-
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
@@ -73,26 +70,8 @@ export default function AnnotatorPage(props: Props): React.FunctionComponentElem
           setAnnotatorState({kind: "error", message: _.get(event, "data.error", "Unable to open the page")});
           break;
 
-        case "iframe.annotate.page":
-          submitForm(pageUrlInputValue);
-          break;
-
-
-        case "iframe.annotate.selection":
-          submitForm(pageUrlInputValue, {
-            "xPath_tofeed": _.get(event, "data.xPath", ""),
-            "textContent_tofeed": _.get(event, "data.textContent", ""),
-            "startOffset_tofeed": _.get(event, "data.startOffset", ""),
-            "endOffset_tofeed": _.get(event, "data.endOffset", ""),
-          });
-          break;
-
-        case "iframe.annotate.link":
-          submitForm(_.get(event, "data.href"));
-          break;
-
-        case "iframe.annotate.image":
-          submitForm(_.get(event, "data.src"));
+        case "iframe.annotate":
+          submitForm(_.get(event, "data.data", {}));
           break;
       }
     };

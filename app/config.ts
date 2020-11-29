@@ -20,7 +20,7 @@ export const config: ConfRec = {
   solrUrl: confRec?.solrUrl ? confRec.solrUrl : "https://b2note.eudat.eu/solr/b2note_index/select",
   imgPath: "/img/",
   name: "B2NOTE Central UI",
-  version: "v0.2.0",
+  version: "v0.2.1",
   homepage: "https://b2note.bsc.es"
 };
 

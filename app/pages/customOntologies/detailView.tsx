@@ -1,4 +1,3 @@
-import _ from "lodash";
 import * as React from "react";
 import { AppContext } from "app/context";
 import { OntologyMeta, Ontology } from "core/ontologyRegister";
@@ -32,7 +31,7 @@ export default function DetailView(props: Props): React.FunctionComponentElement
             setLoading(false);
             setErrorMessage(err);
           }
-        )
+        );
       }
     },
     [mbUser, props.ontologyMeta]
@@ -50,19 +49,27 @@ export default function DetailView(props: Props): React.FunctionComponentElement
             <span>&times;</span>
           </button>
         </div>
-        <div className="card-body" style={{height: "calc(100vh - 270px)", overflowY: "scroll"}}>
-          {ontology ?
-            ontology.terms.map(oTerm =>
-              <div key={oTerm.label} className="m-2">
-                {oTerm.label}
-              </div>
-            )
-          : <></>}
-          <div className="d-flex flex-row justify-content-center mt-2">
-            <SpinningWheel show={loading}/>
-            <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+        {ontology ?
+          <div className="card-body" style={{height: "calc(100vh - 270px)", overflowY: "scroll"}}>
+            <table className="table table-striped">
+              <thead>
+                <tr><th>Label</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                {ontology.terms.map(oTerm =>
+                  <tr key={oTerm.label}>
+                    <td>{oTerm.label}</td>
+                    <td>{oTerm.description}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <div className="d-flex flex-row justify-content-center mt-2">
+              <SpinningWheel show={loading}/>
+              <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+            </div>
           </div>
-        </div>
+        : <></>}
       </div>
     </div>
   );

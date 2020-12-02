@@ -2,6 +2,7 @@ import * as React from "react";
 import type { AppContext } from "app/context";
 import { OntologyMeta } from "core/ontologyRegister";
 import * as api from "app/api/ontologyRegister";
+import SpinningWheel from "app/components/spinningWheel";
 import * as icons from "app/components/icons";
 
 export interface Props {
@@ -14,13 +15,15 @@ export interface Props {
 
 export default function NameEditor(props: Props): React.FunctionComponentElement<Props> {
   const [name, setName] = React.useState(props.ontology.name || "New name");
+  const [loading, setLoading] = React.useState(false);
   const mbUser = props.appContext.mbUser;
 
   function updateName(): void {
     if (mbUser) {
+      setLoading(true);
       api.updateOntologyName(mbUser, props.ontology.id, name, props.appContext.authErrAction).then(
-        () => props.doneHandler(),
-        err => props.errorHandler(err)
+        () => { setLoading(false); props.doneHandler(); },
+        err => { setLoading(false); props.errorHandler(err); }
       );
     }
   }
@@ -42,11 +45,15 @@ export default function NameEditor(props: Props): React.FunctionComponentElement
   function renderActionButtons(): React.ReactElement {
     return (
       <div className="btn-group">
-        <button type="button" className="btn btn-primary"
-          disabled={name.length === 0}
-          onClick={updateName}>
-          <icons.SaveIcon/>
-        </button>
+        {loading ?
+          <SpinningWheel show={true}/>
+        :
+          <button type="button" className="btn btn-primary"
+            disabled={name.length === 0}
+            onClick={updateName}>
+            <icons.SaveIcon/>
+          </button>
+        }
         <button type="button" className="btn btn-secondary"
           onClick={() => props.cancelledHandler()}>
           <icons.CancelIcon/>

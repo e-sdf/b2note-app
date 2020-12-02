@@ -43,7 +43,8 @@ export default function DetailView(props: Props): React.FunctionComponentElement
     <div className="container">
       <div className="card">
         <div className="card-header">
-          {props.ontologyMeta.uri}
+          {props.ontologyMeta.name ? <span>{props.ontologyMeta.name} </span> : <></>}
+          {"<"}<a href={props.ontologyMeta.uri}>{props.ontologyMeta.uri}</a>{">"}
           <button type="button" className="ml-auto close"
             onClick={() => props.closeHandler()}>
             <span>&times;</span>

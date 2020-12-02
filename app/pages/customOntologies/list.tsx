@@ -4,6 +4,7 @@ import * as oApi from "app/api/ontologyRegister";
 import * as userApi from "app/api/profile";
 import { SysContext, AppContext } from "app/context";
 import { renderDeleteConfirmation } from "app/components/deleteConfirmation";
+import NameEditor from "./nameEditor";
 import * as icons from "app/components/icons";
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 
 export default function OntologiesList(props: Props): React.FunctionComponentElement<Props> {
   const [userOntologies, setUserOntologies] = React.useState([] as Array<OntologyMeta>);
+  const [edited, setEdited] = React.useState(null as OntologyMeta|null);
   const [pendingDelete, setPendingDelete] = React.useState(null as OntologyMeta|null);
 
   const mbUser = props.appContext.mbUser;
@@ -98,10 +100,18 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
             </button>
           }
           {o.creatorId === mbUser?.profile.id ?
-            <button type="button" className="btn btn-sm btn-danger"
-              onClick={() => setPendingDelete(o)}>
-              <icons.DeleteIcon/>
-            </button>
+            <>
+              <button type="button" className="btn btn-sm btn-primary"
+                data-toggle="tooltip" data-placement="bottom" title={o.name ? "Edit ontology name" : "Set ontology name"}
+                onClick={() => setEdited(o)}>
+                <icons.EditIcon/>
+              </button>
+              <button type="button" className="btn btn-sm btn-danger"
+                data-toggle="tooltip" data-placement="bottom" title="Delete ontology"
+                onClick={() => setPendingDelete(o)}>
+                <icons.DeleteIcon/>
+              </button>
+            </>
           : <></>
           }
         </div>
@@ -110,21 +120,38 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
 
     const bgCol = isMyCustomOntology ? "#afa" : "#eee";
 
-              // <div className="badge badge-info ml-2">{`${o.terms.length} terms`}</div>
     return (
-      <tr key={o.uri} className="mt-1 mb-1" style={{backgroundColor: bgCol}}>
+      <>
+        <tr key={o.uri} className="mt-1 mb-1" style={{backgroundColor: bgCol}}>
+          <td>
+            {edited === o ?
+              <NameEditor
+                appContext={props.appContext}
+                ontology={o}
+                doneHandler={() => { setEdited(null); props.ontologyChangedHandler(); }}
+                cancelledHandler={() => setEdited(null)}
+                errorHandler={props.errorHandler}
+              />
+            : 
+              <>
+                <a href={o.uri} target="_blank" rel="noreferrer"
+                  data-toggle="tooltip" data-placement="bottom" title={o.uri}>
+                  {o.name ? o.name : o.uri}
+                </a>
+                <div className="badge badge-info ml-2">{`${o.noOfTerms} terms`}</div>
+              </>
+            }
+          </td>
+          <td>{renderOntologyActions()}</td>
+        </tr>
         {pendingDelete === o ?
-          renderDeleteConfirmation(() => deleteOntology(o), () => setPendingDelete(null))
-        :
-          <>
-            <td>
-              <a href={o.uri} target="_blank" rel="noreferrer">{o.uri}</a>
-              <div className="badge badge-info ml-2">{`${o.noOfTerms} terms`}</div>
+          <tr className="mt-1 mb-1">
+            <td colSpan={2} className="p-1" style={{backgroundColor: bgCol}}>
+              {renderDeleteConfirmation(() => deleteOntology(o), () => setPendingDelete(null))}
             </td>
-            <td>{renderOntologyActions()}</td>
-          </>
-        }
-      </tr>
+          </tr>
+        : <></>}
+      </>
     );
   }
 

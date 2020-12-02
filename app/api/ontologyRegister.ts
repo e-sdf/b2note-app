@@ -2,7 +2,8 @@ import allSettled from "promise.allsettled";
 import * as config from "app/config";
 import type { AuthUser, AppContext } from "app/context";
 import type { AuthErrAction } from "core/http";
-import { get, post, del } from "core/http";
+import { get, post, patch, del } from "core/http";
+import { OntologyGetQuery, OntologyPatchQuery } from "core/apiModels/ontologyQueryModel";
 import type { OTermsDict } from "core/ontologyRegister";
 import type { OntologyMeta, Ontology, OntologyFormat, OntologyTerm } from "core/ontologyRegister";
 import * as oreg from "core/ontologyRegister";
@@ -18,7 +19,11 @@ export function getOntology(user: AuthUser, ontId: string, authErrAction: AuthEr
 }
 
 export function importOntology(user: AuthUser, ontUrl: string, format: OntologyFormat, authErrAction: AuthErrAction): Promise<any> {
-  return post(ontologiesUrl, { url: ontUrl, format },  { token: user.token, authErrAction });
+  return post(ontologiesUrl, { url: ontUrl, format } as OntologyGetQuery,  { token: user.token, authErrAction });
+}
+
+export function updateOntologyName(user: AuthUser, ontId: string, name: string, authErrAction: AuthErrAction): Promise<any> {
+  return patch(ontologiesUrl, { id: ontId, name } as OntologyPatchQuery, { token: user.token, authErrAction });
 }
 
 export function deleteOntology(user: AuthUser, o: OntologyMeta, authErrAction: AuthErrAction): Promise<any> {

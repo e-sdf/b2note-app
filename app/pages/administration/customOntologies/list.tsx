@@ -4,7 +4,7 @@ import * as oApi from "app/api/ontologyRegister";
 import * as userApi from "app/api/profile";
 import { SysContext, AppContext } from "app/context";
 import { renderDeleteConfirmation } from "app/components/deleteConfirmation";
-import NameEditor from "./nameEditor";
+import NameEditor from "../nameEditor";
 import * as icons from "app/components/icons";
 
 interface Props {
@@ -127,7 +127,8 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
             {edited === o ?
               <NameEditor
                 appContext={props.appContext}
-                ontology={o}
+                name={o.name}
+                updatePmFn={name => mbUser ? oApi.updateOntologyName(mbUser, o.id, name, props.appContext.authErrAction) : Promise.resolve()}
                 doneHandler={() => { setEdited(null); props.ontologyChangedHandler(); }}
                 cancelledHandler={() => setEdited(null)}
                 errorHandler={props.errorHandler}
@@ -157,7 +158,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
 
   return (
     <table className="table mt-2 mb-2">
-      {props.ontologies.map(o => renderOntologyRow(o))}
+      {props.ontologies.map(renderOntologyRow)}
     </table>
   );
 }

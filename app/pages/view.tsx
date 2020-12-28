@@ -1,4 +1,4 @@
-import { matchSwitch } from '@babakness/exhaustive-type-checking';
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "app/config";
@@ -11,7 +11,7 @@ import * as icons from "app/components/icons";
 import { PagesEnum } from "app/pages/pages";
 import AuthProviderSelectionPage from "app/pages/login";
 import AnnotatorPage from "app/pages/annotator/view";
-import CustomOntologiesPage from "app/pages/customOntologies/view";
+import AdministrationPage from "app/pages/administration/view";
 import ProfilePage from "app/pages/profile";
 
 enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
@@ -21,7 +21,7 @@ interface Props {
 }
 
 function MainView(props: Props): React.FunctionComponentElement<Props> {
-  const [page, setPage] = React.useState(PagesEnum.ONTOLOGIES);
+  const [page, setPage] = React.useState(PagesEnum.ADMIN);
   const [appContext, setAppContext] = React.useState({ mbUser: null, authErrAction: loginPm } as AppContext);
   const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
   const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | AuthProvidersEnum);
@@ -122,8 +122,8 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
           <AnnotatorPage 
             sysContext={props.sysContext}
             appContext={appContext}/>,
-        [PagesEnum.ONTOLOGIES]: () => 
-          <CustomOntologiesPage 
+        [PagesEnum.ADMIN]: () => 
+          <AdministrationPage 
             sysContext={props.sysContext}
             appContext={appContext}
             profileChangedHandler={() => retrieveProfile(authProvider, appContext.mbUser?.token || null)}/>
@@ -140,14 +140,14 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
             <a
               className={"nav-link" + activeFlag(PagesEnum.ANNOTATOR)} href="#"
               onClick={() => setPage(PagesEnum.ANNOTATOR)}>
-              Annotator
+              <icons.AnnotateIcon/> Annotator
             </a>
           </li>
           <li className="nav-item">
             <a
-              className={"nav-link" + activeFlag(PagesEnum.ONTOLOGIES)} href="#"
-              onClick={() => setPage(PagesEnum.ONTOLOGIES)}>
-              Custom Ontologies
+              className={"nav-link" + activeFlag(PagesEnum.ADMIN)} href="#"
+              onClick={() => setPage(PagesEnum.ADMIN)}>
+              <icons.ConfigureIcon/> Administration
             </a>
           </li>
           <li className="nav-item ml-auto">
@@ -210,7 +210,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
   }
 
   return (
-    <div>
+    <div style={{height: "100%"}}>
       {renderBanner()}
       {renderNavbar()}
       {pageComp()}

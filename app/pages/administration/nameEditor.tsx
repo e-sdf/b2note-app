@@ -1,27 +1,26 @@
 import * as React from "react";
 import type { AppContext } from "app/context";
-import { OntologyMeta } from "core/ontologyRegister";
-import * as api from "app/api/ontologyRegister";
 import SpinningWheel from "app/components/spinningWheel";
 import * as icons from "app/components/icons";
 
 export interface Props {
   appContext: AppContext;
-  ontology: OntologyMeta;
+  name: string|undefined;
+  updatePmFn(name: string): Promise<any>;
   doneHandler(): void;
   cancelledHandler(): void;
   errorHandler(err: string): void;
 }
 
 export default function NameEditor(props: Props): React.FunctionComponentElement<Props> {
-  const [name, setName] = React.useState(props.ontology.name || "New name");
+  const [name, setName] = React.useState(props.name || "New name");
   const [loading, setLoading] = React.useState(false);
   const mbUser = props.appContext.mbUser;
 
   function updateName(): void {
     if (mbUser) {
       setLoading(true);
-      api.updateOntologyName(mbUser, props.ontology.id, name, props.appContext.authErrAction).then(
+      props.updatePmFn(name).then(
         () => { setLoading(false); props.doneHandler(); },
         err => { setLoading(false); props.errorHandler(err); }
       );

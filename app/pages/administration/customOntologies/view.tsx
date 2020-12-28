@@ -16,7 +16,7 @@ interface Props {
   profileChangedHandler: () => void;
 }
 
-export default function CustomOntologiesPage(props: Props): React.FunctionComponentElement<Props> {
+export default function CustomOntologiesPanel(props: Props): React.FunctionComponentElement<Props> {
   const [ontologies, setOntologies] = React.useState([] as Array<OntologyMeta>);
   const [uploadFromDiskDialog, setUploadFromDiskDialog] = React.useState(false);
   const [uploadFromUrlDialog, setUploadFromUrlDialog] = React.useState(false);
@@ -58,11 +58,6 @@ export default function CustomOntologiesPage(props: Props): React.FunctionCompon
     }
   }
 
-        // <button type="button" className="btn btn-primary"
-        //   disabled={mbUser == null}
-        //   onClick={() => setUploadFromDiskDialog(true)}>
-        //   <icons.DiskIcon/> Import Ontology from Disk
-        // </button>
   function renderAddMenuButton(): React.ReactElement {
     return (
       <div className="d-flex flex-row">

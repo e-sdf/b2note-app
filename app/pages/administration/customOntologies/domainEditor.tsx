@@ -1,26 +1,28 @@
 import * as React from "react";
+import { Typeahead } from "react-bootstrap-typeahead";
 import type { AppContext } from "app/context";
+import type { Domain } from "core/domainModel";
 import SpinningWheel from "app/components/spinningWheel";
 import * as icons from "app/components/icons";
 
 export interface Props {
   appContext: AppContext;
-  name?: string|undefined;
-  updatePmFn(name: string): Promise<any>;
+  options: Array<Domain>;
+  updatePmFn(domain: Domain): Promise<any>;
   doneHandler(): void;
   cancelledHandler(): void;
   errorHandler(err: string): void;
 }
 
 export default function NameEditor(props: Props): React.FunctionComponentElement<Props> {
-  const [name, setName] = React.useState(props.name || "New name");
+  const [domain, setDomain] = React.useState(null as null|Domain);
   const [loading, setLoading] = React.useState(false);
   const mbUser = props.appContext.mbUser;
 
-  function updateName(): void {
-    if (mbUser) {
+  function updateDomain(): void {
+    if (mbUser && domain) {
       setLoading(true);
-      props.updatePmFn(name).then(
+      props.updatePmFn(domain).then(
         () => { setLoading(false); props.doneHandler(); },
         err => { setLoading(false); props.errorHandler(err); }
       );
@@ -29,14 +31,11 @@ export default function NameEditor(props: Props): React.FunctionComponentElement
 
   function renderInput(): React.ReactElement {
     return (
-      <input type="text" className="form-control"
-        ref={inputElement => { if (inputElement) { inputElement.focus(); }}}
-        value={name}
-        onKeyDown={ev => {
-          if (ev.key === "Enter" && mbUser) { updateName(); }
-        }}
-        onFocus={e => e.currentTarget.select()}
-        onChange={ev => setName(ev.target.value)}
+      <Typeahead
+        onChange={selected => { if (selected.length > 0) { setDomain(selected[0]); }}}
+        options={props.options}
+        labelKey="name"
+        onKeyDown={ev => {if (domain && (ev as KeyboardEvent).code === "Enter") { updateDomain(); }}}
       />
     );
   }
@@ -48,8 +47,8 @@ export default function NameEditor(props: Props): React.FunctionComponentElement
           <SpinningWheel show={true}/>
         :
           <button type="button" className="btn btn-sm btn-primary"
-            disabled={name.length === 0}
-            onClick={updateName}>
+            disabled={domain === null}
+            onClick={updateDomain}>
             <icons.SaveIcon/>
           </button>
         }

@@ -1,10 +1,10 @@
 import * as React from "react";
 
-export interface SpinningWheelProps {
+export interface Props {
   show: boolean;
 }
 
-export default function SpinningWheel(props: SpinningWheelProps): React.FunctionComponentElement<SpinningWheelProps> {
+export default function SpinningWheel(props: Props): React.FunctionComponentElement<Props> {
   return (
     props.show ?
       <div className="spinner-border text-primary" role="status">

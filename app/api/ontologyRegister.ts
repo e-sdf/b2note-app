@@ -6,9 +6,12 @@ import { get, post, patch, del } from "core/http";
 import { OntologyGetQuery, OntologyPatchQuery } from "core/apiModels/ontologyQueryModel";
 import type { OTermsDict } from "core/ontologyRegister";
 import type { OntologyMeta, Ontology, OntologyFormat, OntologyTerm } from "core/ontologyRegister";
+import type { Domain } from "core/domainModel";
 import * as oreg from "core/ontologyRegister";
 
 const ontologiesUrl = config.endpointUrl + oreg.ontologiesUrl;
+
+// Ontologies management {{{1
 
 export function getCustomOntologiesMetas(user: AuthUser, authErrAction: AuthErrAction): Promise<Array<OntologyMeta>> {
   return get(ontologiesUrl, {}, { token: user.token, authErrAction });
@@ -22,13 +25,25 @@ export function importOntology(user: AuthUser, ontUrl: string, format: OntologyF
   return post(ontologiesUrl, { url: ontUrl, format } as OntologyGetQuery,  { token: user.token, authErrAction });
 }
 
-export function updateOntologyName(user: AuthUser, ontId: string, name: string, authErrAction: AuthErrAction): Promise<any> {
-  return patch(ontologiesUrl, { id: ontId, name } as OntologyPatchQuery, { token: user.token, authErrAction });
+export function patchOntology(user: AuthUser, changes: OntologyPatchQuery , authErrAction: AuthErrAction): Promise<any> {
+  return patch(ontologiesUrl, changes , { token: user.token, authErrAction });
 }
 
 export function deleteOntology(user: AuthUser, o: OntologyMeta, authErrAction: AuthErrAction): Promise<any> {
   return del(ontologiesUrl + "/" + o.id, { token: user.token, authErrAction });
 }
+
+// Domains management {{{1
+
+export function addDomain(user: AuthUser, o: OntologyMeta, d: Domain, authErrAction: AuthErrAction): Promise<void> {
+  return post(`${ontologiesUrl}/${o.id}/domains/${d.id}`, {}, { token: user.token, authErrAction });
+}
+
+export function removeDomain(user: AuthUser, o: OntologyMeta, d: Domain, authErrAction: AuthErrAction): Promise<void> {
+  return del(`${ontologiesUrl}/${o.id}/domains/${d.id}`, { token: user.token, authErrAction });
+}
+
+// Terms queries {{{1
 
 export function findOTerms(appContext: AppContext, query: string): Promise<OTermsDict> {
   return new Promise((resolve, reject) => {

@@ -58,7 +58,7 @@ export default function CustomOntologiesPanel(props: Props): React.FunctionCompo
     }
   }
 
-  function renderAddMenuButton(): React.ReactElement {
+  function renderAddButton(): React.ReactElement {
     return (
       <div className="d-flex flex-row">
         <button type="button" className="btn btn-primary ml-2"
@@ -151,7 +151,7 @@ export default function CustomOntologiesPanel(props: Props): React.FunctionCompo
           </div>
           <div className="container mt-2">
             {!uploadFromUrlDialog && !uploadFromDiskDialog ?
-              renderAddMenuButton()
+              renderAddButton()
             : uploadFromDiskDialog ?
               renderUploadFromDiskDialog()
             : renderUploadFromUrlDialog()}

@@ -25,7 +25,7 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
 
   function loadDomains(): void {
     setLoading(true);
-    api.getDomainsPm(props.sysContext.config).then(
+    api.getDomains().then(
       domains => { setDomains(domains); setLoading(false); },
       err => setErrorMessage(err)
     );
@@ -38,7 +38,7 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
   function addDomain(): void {
     if (mbUser) {
       setLoading(true);
-      api.addDomain(props.sysContext.config, newDomain, mbUser.token, props.appContext.authErrAction).then(
+      api.addDomain(newDomain, mbUser.token, props.appContext.authErrAction).then(
         () => {
           setLoading(false);
           setNewDomain("");
@@ -115,7 +115,7 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
               <NameEditor
                 appContext={props.appContext}
                 name={d.name}
-                updatePmFn={name => mbUser ? api.patchDomainPm(props.sysContext.config, { id: d.id, name }, mbUser.token, props.appContext.authErrAction) : Promise.resolve()}
+                updatePmFn={name => mbUser ? api.patchDomain({ id: d.id, name }, mbUser.token, props.appContext.authErrAction) : Promise.resolve()}
                 doneHandler={() => { setEdited(null); loadDomains(); }}
                 cancelledHandler={() => setEdited(null)}
                 errorHandler={setErrorMessage}

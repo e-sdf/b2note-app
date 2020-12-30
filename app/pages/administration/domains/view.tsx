@@ -1,3 +1,4 @@
+import _ from "lodash";
 import * as React from "react";
 import { SysContext, AppContext } from "app/context";
 import type { Domain } from "core/domainModel";
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export default function DomainsPanel(props: Props): React.FunctionComponentElement<Props> {
-  const [domains, setDomains] = React.useState([] as Array<Domain>);
+  const [domains, setDomains] = React.useState([] as Array<[Domain, number]>);
   const [newDomain, setNewDomain] = React.useState("");
   const [edited, setEdited] = React.useState(null as Domain|null);
   const [pendingDelete, setPendingDelete] = React.useState(null as Domain|null);
@@ -26,7 +27,14 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
   function loadDomains(): void {
     setLoading(true);
     api.getDomains().then(
-      domains => { setDomains(domains); setLoading(false); },
+      domains => Promise.allSettled(domains.map(d => api.getOntologiesForDomain(d))).then(
+        res => {
+          console.log(res);
+          const ontNums = res.map(r => r.status === "fulfilled" ? r.value.length : NaN);
+          setDomains(_.zip(domains, ontNums) as Array<[Domain, number]>);
+          setLoading(false);
+        }
+      ),
       err => setErrorMessage(err)
     );
   }
@@ -86,9 +94,9 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
     );
   }
 
-  function renderDomainRow(d: Domain): React.ReactElement {
+  function renderDomainRow([d, ontNum]: [Domain, number]): React.ReactElement {
 
-    function renderActions(): React.ReactElement {
+    function renderActions(ontNum: number): React.ReactElement {
       return (
         d.creatorId === mbUser?.profile.id ?
           <>
@@ -98,7 +106,8 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
               <icons.EditIcon />
             </button>
             <button type="button" className="btn btn-sm btn-danger"
-              data-toggle="tooltip" data-placement="bottom" title="Delete"
+              data-toggle="tooltip" data-placement="bottom" title={ontNum > 0 ? "Cannot delete, used in ontologies" : "Delete"}
+              disabled={ontNum > 0}
               onClick={() => setPendingDelete(d)}>
               <icons.DeleteIcon />
             </button>
@@ -120,10 +129,20 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
                 cancelledHandler={() => setEdited(null)}
                 errorHandler={setErrorMessage}
               />
-            : d.name
+            : 
+              <>
+                <span>{d.name} </span>
+                {ontNum > 0 ?
+                  <span 
+                    className="badge badge-info"
+                    data-toggle="tooltip" data-placement="bottom" title={`Used in ${ontNum} ontologies`}>
+                      {ontNum}
+                    </span>
+                : <></>}
+              </>
             }
           </td>
-          <td>{renderActions()}</td>
+          <td>{renderActions(ontNum)}</td>
         </tr>
         {pendingDelete === d ?
           <tr className="mt-1 mb-1">

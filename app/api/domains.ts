@@ -27,3 +27,10 @@ export function patchDomain(changes: DomainPatchQuery, token: Token, authErrActi
 export function deleteDomain(config: ConfRec, d: Domain, token: Token, authErrAction: AuthErrAction): Promise<void> {
   return del(domainsUrl + "/" + d.id, { token, authErrAction });
 }
+
+// Queries {{{1
+
+export function getOntologiesForDomain(d: Domain): Promise<Array<string>> {
+  return get(`${domainsUrl}/${d.id}/ontologies`);
+}
+

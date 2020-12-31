@@ -34,3 +34,6 @@ export function getOntologiesForDomain(d: Domain): Promise<Array<string>> {
   return get(`${domainsUrl}/${d.id}/ontologies`);
 }
 
+export function getUsersOfDomain(d: Domain): Promise<Array<string>> {
+  return get(`${domainsUrl}/${d.id}/users`);
+}

@@ -9,9 +9,9 @@ export interface Props {
   appContext: AppContext;
   options: Array<Domain>;
   updatePmFn(domain: Domain): Promise<any>;
-  doneHandler(): void;
-  cancelledHandler(): void;
-  errorHandler(err: string): void;
+  doneHandler?(): void;
+  cancelledHandler?(): void;
+  errorHandler?(err: string): void;
 }
 
 export default function NameEditor(props: Props): React.FunctionComponentElement<Props> {
@@ -23,8 +23,8 @@ export default function NameEditor(props: Props): React.FunctionComponentElement
     if (mbUser && domain) {
       setLoading(true);
       props.updatePmFn(domain).then(
-        () => { setLoading(false); props.doneHandler(); },
-        err => { setLoading(false); props.errorHandler(err); }
+        () => { setLoading(false); if (props.doneHandler) { props.doneHandler(); }},
+        err => { setLoading(false); if (props.errorHandler) { props.errorHandler(err); }}
       );
     }
   }
@@ -53,7 +53,7 @@ export default function NameEditor(props: Props): React.FunctionComponentElement
           </button>
         }
         <button type="button" className="btn btn-sm btn-warning"
-          onClick={() => props.cancelledHandler()}>
+          onClick={() => { if (props.cancelledHandler) { props.cancelledHandler(); }}}>
           <icons.CancelIcon/>
         </button>
       </div>

@@ -1,4 +1,3 @@
-import _ from "lodash";
 import * as React from "react";
 import { SysContext, AppContext } from "app/context";
 import type { Domain } from "core/domainModel";
@@ -14,8 +13,14 @@ interface Props {
   appContext: AppContext;
 }
 
+interface DomainInfo {
+  domain: Domain;
+  noOfOntologies: number;
+  noOfUsers: number;
+}
+
 export default function DomainsPanel(props: Props): React.FunctionComponentElement<Props> {
-  const [domains, setDomains] = React.useState([] as Array<[Domain, number]>);
+  const [domainInfos, setDomainInfos] = React.useState([] as Array<DomainInfo>);
   const [newDomain, setNewDomain] = React.useState("");
   const [edited, setEdited] = React.useState(null as Domain|null);
   const [pendingDelete, setPendingDelete] = React.useState(null as Domain|null);
@@ -28,11 +33,15 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
     setLoading(true);
     api.getDomains().then(
       domains => Promise.allSettled(domains.map(d => api.getOntologiesForDomain(d))).then(
-        res => {
-          console.log(res);
-          const ontNums = res.map(r => r.status === "fulfilled" ? r.value.length : NaN);
-          setDomains(_.zip(domains, ontNums) as Array<[Domain, number]>);
-          setLoading(false);
+        ontologiesRes => {
+          const ontNums = ontologiesRes.map(r => r.status === "fulfilled" ? r.value.length : NaN);
+          Promise.allSettled(domains.map(d => api.getUsersOfDomain(d))).then(
+            usersRes => {
+              const usersNums = usersRes.map(r => r.status === "fulfilled" ? r.value.length : NaN);
+              setDomainInfos(domains.map((d, i) => ({ domain: d, noOfOntologies: ontNums[i], noOfUsers: usersNums[i] })));
+              setLoading(false);
+            }
+          );
         }
       ),
       err => setErrorMessage(err)
@@ -94,9 +103,21 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
     );
   }
 
-  function renderDomainRow([d, ontNum]: [Domain, number]): React.ReactElement {
+  function renderDomainRow(dInfo: DomainInfo): React.ReactElement {
+    const d = dInfo.domain;
+    const used = dInfo.noOfOntologies > 0 || dInfo.noOfUsers > 0;
 
-    function renderActions(ontNum: number): React.ReactElement {
+    function renderUsageBadge(num: number, label: string): React.ReactElement {
+      return (
+        num > 0 ?
+          <span className="badge badge-info">
+            {num} {label}
+          </span>
+        : <></>
+      );
+    }
+
+    function renderActions(): React.ReactElement {
       return (
         d.creatorId === mbUser?.profile.id ?
           <>
@@ -106,8 +127,9 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
               <icons.EditIcon />
             </button>
             <button type="button" className="btn btn-sm btn-danger"
-              data-toggle="tooltip" data-placement="bottom" title={ontNum > 0 ? "Cannot delete, used in ontologies" : "Delete"}
-              disabled={ontNum > 0}
+              data-toggle="tooltip" data-placement="bottom"
+              title={used ? "Domain in use" : "Delete"}
+              disabled={used}
               onClick={() => setPendingDelete(d)}>
               <icons.DeleteIcon />
             </button>
@@ -129,20 +151,16 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
                 cancelledHandler={() => setEdited(null)}
                 errorHandler={setErrorMessage}
               />
-            : 
+            :
               <>
                 <span>{d.name} </span>
-                {ontNum > 0 ?
-                  <span 
-                    className="badge badge-info"
-                    data-toggle="tooltip" data-placement="bottom" title={`Used in ${ontNum} ontologies`}>
-                      {ontNum}
-                    </span>
-                : <></>}
+                {renderUsageBadge(dInfo.noOfOntologies, "ontologies")}
+                <span> </span>
+                {renderUsageBadge(dInfo.noOfUsers, "users")}
               </>
             }
           </td>
-          <td>{renderActions(ontNum)}</td>
+          <td>{renderActions()}</td>
         </tr>
         {pendingDelete === d ?
           <tr className="mt-1 mb-1">
@@ -158,7 +176,7 @@ export default function DomainsPanel(props: Props): React.FunctionComponentEleme
   return (
     <div className="container">
       <table className="table mt-2 mb-2">
-        {domains.map(renderDomainRow)}
+        {domainInfos.map(renderDomainRow)}
         {renderAddRow()}
       </table>
       <div className="d-flex flex-row justify-content-center mt-2">

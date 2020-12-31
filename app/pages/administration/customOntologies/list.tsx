@@ -7,7 +7,7 @@ import { SysContext, AppContext } from "app/context";
 import type { Domain } from "core/domainModel";
 import Tag from "app/components/tag";
 import { renderDeleteConfirmation } from "app/components/deleteConfirmation";
-import DomainEditor from "./domainEditor";
+import DomainEditor from "../../../components/domainEditor";
 import NameEditor from "../nameEditor";
 import * as icons from "app/components/icons";
 
@@ -107,6 +107,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
               return (
                 mbDomain ?
                   <Tag 
+                    id={did}
                     tag={mbDomain.name}
                     deletePmFn={
                       o.creatorId === mbUser?.profile.id ?

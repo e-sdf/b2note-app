@@ -114,7 +114,8 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
       [PagesEnum.PROFILE]: () =>
         appContext.mbUser ?
           <ProfilePage
-            config={props.sysContext.config}
+            sysContext={props.sysContext}
+            appContext={appContext}
             user={appContext.mbUser}
             updateProfileFn={() => retrieveProfile(authProvider, appContext.mbUser?.token ? appContext.mbUser.token : null)} authErrAction={() => loginPm()}/>
         : <></>,

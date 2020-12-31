@@ -2,10 +2,11 @@ import * as React from "react";
 import SpinningWheel from "app/components/spinningWheel";
 
 export interface Props {
+  id?: string;
   tag: string;
   deletePmFn: (() => Promise<void>)|undefined;
-  doneHandler(): void;
-  errorHandler(err: string): void;
+  doneHandler?(): void;
+  errorHandler?(err: string): void;
 }
 
 export default function Tag(props: Props): React.FunctionComponentElement<Props> {
@@ -16,7 +17,10 @@ export default function Tag(props: Props): React.FunctionComponentElement<Props>
     loading ?
       <SpinningWheel show={true} />
     :
-      <span className="badge badge-pill badge-light" style={{fontSize: "85%", marginLeft: 2, marginRight: 2}}>
+      <span 
+        id={props.id}
+        className="badge badge-pill badge-light"
+        style={{fontSize: "85%", marginLeft: 2, marginRight: 2}}>
         {props.tag}
         {deletePmFn ?
           <>
@@ -25,8 +29,8 @@ export default function Tag(props: Props): React.FunctionComponentElement<Props>
               onClick={() => {
                 if (deletePmFn) {
                   deletePmFn().then(
-                    () => { setLoading(false); props.doneHandler(); },
-                    err => { setLoading(false); props.errorHandler(err); }
+                    () => { setLoading(false); if (props.doneHandler) { props.doneHandler(); }},
+                    err => { setLoading(false); if (props.errorHandler) { props.errorHandler(err); }}
                   );
                 }
               }}>

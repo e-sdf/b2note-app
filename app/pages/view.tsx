@@ -21,7 +21,7 @@ interface Props {
 }
 
 function MainView(props: Props): React.FunctionComponentElement<Props> {
-  const [page, setPage] = React.useState(PagesEnum.ADMIN);
+  const [page, setPage] = React.useState(PagesEnum.ANNOTATOR);
   const [appContext, setAppContext] = React.useState({ mbUser: null, authErrAction: loginPm } as AppContext);
   const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
   const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | AuthProvidersEnum);
@@ -119,12 +119,12 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
             user={appContext.mbUser}
             updateProfileFn={() => retrieveProfile(authProvider, appContext.mbUser?.token ? appContext.mbUser.token : null)} authErrAction={() => loginPm()}/>
         : <></>,
-        [PagesEnum.ANNOTATOR]: () => 
-          <AnnotatorPage 
+        [PagesEnum.ANNOTATOR]: () =>
+          <AnnotatorPage
             sysContext={props.sysContext}
             appContext={appContext}/>,
-        [PagesEnum.ADMIN]: () => 
-          <AdministrationPage 
+        [PagesEnum.ADMIN]: () =>
+          <AdministrationPage
             sysContext={props.sysContext}
             appContext={appContext}
             profileChangedHandler={() => retrieveProfile(authProvider, appContext.mbUser?.token || null)}/>

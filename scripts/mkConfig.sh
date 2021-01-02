@@ -9,6 +9,3 @@ JS_API_PATH=`[ -z "$JS_API_PATH" ] && echo "/api" || echo "$JS_API_PATH"`
 echo -n "window.b2note = { appServerUrl: '"$JS_APP_SERVER_URL"', apiServerUrl: '"$JS_API_SERVER_URL"', widgetUrl: '"$JS_WIDGET_URL"', apiPath: '"$JS_API_PATH"' };" > $C
 
 echo "$C created"
-echo "Starting the server..."
-
-cd dist/server; node server

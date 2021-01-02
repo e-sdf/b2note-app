@@ -6,8 +6,8 @@
   "private": true,
   "scripts": {
     "dev-server": "npm run build; webpack-cli serve",
-    "start-dev": "cd dist/server; node -r dotenv/config server",
     "build": "scripts/build.sh",
+    "start-dev": "scripts/mkConfig.sh; cd dist/server; node -r dotenv/config server",
     "deploy": "scripts/git-tag.sh; scripts/docker-build.sh; scripts/docker-tag.sh; scripts/docker-push.sh",
     "clean": "npm cache clean --force"
   },

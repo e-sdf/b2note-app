@@ -1,3 +1,4 @@
+import _ from "lodash";
 import * as React from "react";
 import type { OntologyMeta } from "core/ontologyRegister";
 import * as dApi from "app/api/domains";
@@ -25,6 +26,7 @@ interface Props {
 export default function OntologiesList(props: Props): React.FunctionComponentElement<Props> {
   const [userOntologies, setUserOntologies] = React.useState([] as Array<OntologyMeta>);
   const [domains, setDomains] = React.useState([] as Array<Domain>);
+  const [filterByDomains, setFilterByDomains] = React.useState(false);
   const [editedOntology, setEditedOntology] = React.useState(null as OntologyMeta|null);
   const [newDomain, setNewDomain] = React.useState(null as [string, string]|null);
   const [pendingDelete, setPendingDelete] = React.useState(null as OntologyMeta|null);
@@ -32,7 +34,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
   const mbUser = props.appContext.mbUser;
 
   React.useEffect(
-    () => { 
+    () => {
       dApi.getDomains().then(
         ds => setDomains(ds),
         err => props.errorHandler(err)
@@ -53,6 +55,12 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
 
   function getDomain(id: string): Domain|undefined {
     return domains.find(d => d.id === id);
+  }
+
+  function isInMyDomain(o: OntologyMeta): boolean {
+    const oDomains = o.domainsIds;
+    const myDomains = mbUser?.profile.domainsIds;
+    return oDomains !== undefined && myDomains !== undefined && _.intersection(oDomains, myDomains).length > 0;
   }
 
   function addOntologyToProfile(o: OntologyMeta): void {
@@ -95,6 +103,34 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
     }
   }
 
+  function renderHeading(): React.ReactElement {
+
+    function renderDomainsFilter(): React.ReactElement {
+      return (
+        <div className="form-check">
+          <input type="checkbox" className="form-check-input"
+            checked={filterByDomains}
+            onChange={ev => setFilterByDomains(ev.target.checked)}/>
+          <label className="form-check-label">Show just my domains</label>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <tr>
+          <th>Ontology name/URI</th>
+          <th>Domains</th>
+          <th></th>
+        </tr>
+        <tr>
+          <td></td>
+          <td colSpan={2}>{renderDomainsFilter()}</td>
+        </tr>
+      </>
+    );
+  }
+
   function renderOntologyRow(o: OntologyMeta): React.ReactElement {
     const isMyCustomOntology = userOntologies.some(o1 => o1.id === o.id);
 
@@ -106,7 +142,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
               const mbDomain = getDomain(did);
               return (
                 mbDomain ?
-                  <Tag 
+                  <Tag
                     id={did}
                     tag={mbDomain.name}
                     deletePmFn={
@@ -130,7 +166,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
               cancelledHandler={() => { setNewDomain(null); }}
               errorHandler={props.errorHandler}
             />
-          : 
+          :
             o.creatorId === mbUser?.profile.id ?
               <a href="#" onClick={() => setNewDomain([o.id, "New domain"])}>
                 <icons.AddIcon />
@@ -196,7 +232,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
                 cancelledHandler={() => setEditedOntology(null)}
                 errorHandler={props.errorHandler}
               />
-            : 
+            :
               <>
                 <a href={o.uri} target="_blank" rel="noreferrer"
                   data-toggle="tooltip" data-placement="bottom" title={o.uri}>
@@ -224,8 +260,12 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
 
   return (
     <table className="table mt-2 mb-2">
-      <tr><th>Ontology name/URI</th><th>Domains</th><th></th></tr>
-      {props.ontologies.map(renderOntologyRow)}
+      <thead>
+        {renderHeading()}
+      </thead>
+      <tbody>
+        {props.ontologies.filter(o => filterByDomains ? isInMyDomain(o) : true).map(renderOntologyRow)}
+      </tbody>
     </table>
   );
 }

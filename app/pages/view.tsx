@@ -11,6 +11,7 @@ import * as icons from "app/components/icons";
 import { PagesEnum } from "app/pages/pages";
 import AuthProviderSelectionPage from "app/pages/login";
 import AnnotatorPage from "app/pages/annotator/view";
+import ViewerPage from "app/pages/viewer/view";
 import AdministrationPage from "app/pages/administration/view";
 import ProfilePage from "app/pages/profile";
 
@@ -123,6 +124,8 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
           <AnnotatorPage
             sysContext={props.sysContext}
             appContext={appContext}/>,
+        [PagesEnum.VIEWER]: () =>
+          <ViewerPage />,
         [PagesEnum.ADMIN]: () =>
           <AdministrationPage
             sysContext={props.sysContext}

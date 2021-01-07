@@ -44,6 +44,7 @@
     "preact": "^10.5.8",
     "preact-compat": "^3.19.0",
     "promise.allsettled": "^1.0.2",
+    "rc-resize-observer": "^1.0.0",
     "react-bootstrap-typeahead": "^5.1.4",
     "react-icons": "^4.1.0",
     "ts-enum-util": "^4.0.2",

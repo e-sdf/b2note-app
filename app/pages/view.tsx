@@ -14,6 +14,7 @@ import AnnotatorPage from "app/pages/annotator/view";
 import ViewerPage from "app/pages/viewer/view";
 import AdministrationPage from "app/pages/administration/view";
 import ProfilePage from "app/pages/profile";
+import { stringify } from "uuid";
 
 enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
 
@@ -27,6 +28,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
   const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
   const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | AuthProvidersEnum);
   const [loginState, setLoginState] = React.useState(LoginStateEnum.NOT_LOGGED);
+  const [viewerParams, setViewerParams] = React.useState(["", ""]);
 
   function retrieveProfile(provider: AuthProvidersEnum|null, token: Token|null): void {
     if (provider && token) {
@@ -93,8 +95,18 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
     );
   }
 
+  function handleOpenViewer(msg: MessageEvent): void {
+    const url = msg.data.url;
+    const svg = msg.data.svg;
+    if (url && svg) {
+      setViewerParams([url, svg]);
+      setPage(PagesEnum.VIEWER);
+    }
+  }
+
   React.useEffect(() => {
     if (loginState === LoginStateEnum.NOT_LOGGED) {
+      window.addEventListener("message", (msg) => handleOpenViewer(msg), false);
       firstLogin();
     }
   }, []);
@@ -125,7 +137,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
             sysContext={props.sysContext}
             appContext={appContext}/>,
         [PagesEnum.VIEWER]: () =>
-          <ViewerPage />,
+          <ViewerPage imageUrl={viewerParams[0]} svg={viewerParams[1]} />,
         [PagesEnum.ADMIN]: () =>
           <AdministrationPage
             sysContext={props.sysContext}

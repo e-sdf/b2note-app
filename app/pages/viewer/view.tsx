@@ -1,6 +1,7 @@
 import * as React from "react";
 import DOMPurify from "dompurify";
 import ResizeObserver from "rc-resize-observer";
+import type { DOMNode, Element } from "html-react-parser";
 import reactParse from "html-react-parser";
 import Alert from "app/components/alert";
 
@@ -33,6 +34,41 @@ export default function ViewerPage(props: Props): React.FunctionComponentElement
     [props.svg]
   );
 
+  function rectStyler(node: DOMNode): React.ReactElement|null {
+    if (node.type !== "tag") {
+      setErrorMessage("Cannot display selection: invalid SVG");
+      return null;
+    } else {
+      const elem = node as Element;
+      if (elem.tagName === "rect") {
+        const x = elem.attributes.find(a => a.name === "x")?.value;
+        const y = elem.attributes.find(a => a.name === "y")?.value;
+        const width = elem.attributes.find(a => a.name === "width")?.value;
+        const height = elem.attributes.find(a => a.name === "height")?.value;
+        if (!x) {
+          setErrorMessage("Rectangle selection does not contain attribute x");
+          return null;
+        } else if (!y) {
+          setErrorMessage("Rectangle selection does not contain attribute y");
+          return null;
+        } else if (!width) {
+          setErrorMessage("Rectangle selection does not contain attribute width");
+          return null;
+        } else if (!height) {
+          setErrorMessage("Rectangle selection does not contain attribute height");
+          return null;
+        } else {
+          return (
+            <rect x={x} y={y} width={width} height={height}
+              style={{fill: "rgba(255, 70, 50, 0.2)", stroke: "rgb(255,70,50)", strokeWidth: 3}} />
+          );
+        }
+      } else {
+        return null;
+      }
+    }
+  }
+
   return (
     <div className="container-fluid">
       <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)} />
@@ -42,7 +78,7 @@ export default function ViewerPage(props: Props): React.FunctionComponentElement
             <ResizeObserver onResize={dimensions => setSize([dimensions.width, dimensions.height])}>
                 <image xlinkHref={props.imageUrl}/>
             </ResizeObserver>
-            {reactParse(svg)}
+            {reactParse(svg, { replace: rectStyler })}
           </g>
         </svg>
       : <></>}

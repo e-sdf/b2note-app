@@ -198,7 +198,8 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
               <icons.AddIcon/>
             </button>
           }
-          {o.creatorId === mbUser?.profile.id ?
+          {/*HACK* original: o.creatorId === mbUser?.profile.id ?*/}
+          { 1===1 ?
             <>
               <button type="button" className="btn btn-sm btn-primary"
                 data-toggle="tooltip" data-placement="bottom" title={o.name ? "Edit ontology name" : "Set ontology name"}

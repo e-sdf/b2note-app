@@ -250,7 +250,7 @@ export default function OntologiesList(props: Props): React.FunctionComponentEle
         </tr>
         {pendingDelete === o ?
           <tr className="mt-1 mb-1">
-            <td colSpan={2} className="p-1" style={{backgroundColor: bgCol}}>
+            <td colSpan={3} className="p-1" style={{backgroundColor: bgCol}}>
               {renderDeleteConfirmation(() => deleteOntology(o), () => setPendingDelete(null))}
             </td>
           </tr>

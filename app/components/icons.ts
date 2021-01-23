@@ -13,6 +13,7 @@ export const KeywordIcon = icons.FaQuoteRight;
 export const CommentIcon = icons.FaCommentDots;
 export const DownloadIcon = icons.FaDownload;
 export const UploadIcon = icons.FaUpload;
+export const UrlIcon = icons.FaLink;
 
 export const PrivateIcon = icons.FaUser;
 export const PublicIcon = icons.FaGlobe;

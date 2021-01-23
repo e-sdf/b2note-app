@@ -58,14 +58,21 @@ export default function CustomOntologiesPanel(props: Props): React.FunctionCompo
     }
   }
 
-  function renderAddButton(): React.ReactElement {
+  function renderAddButtons(): React.ReactElement {
     return (
-      <div className="d-flex flex-row">
+      <div className="d-flex flex-row justify-content-center">
         <button type="button" className="btn btn-primary ml-2"
           disabled={mbUser == null}
           onClick={() => setUploadFromUrlDialog(true)}>
-          <icons.UploadIcon/> Import Ontology from URL
+          <icons.UrlIcon/> Import Ontology from URL
         </button>
+        {/*
+          <button type="button" className="btn btn-primary ml-2"
+          disabled={mbUser == null}
+          onClick={() => setUploadFromDiskDialog(true)}>
+          <icons.UploadIcon/> Import Ontology from Disk
+        </button>
+        */}
       </div>
     );
   }
@@ -130,14 +137,14 @@ export default function CustomOntologiesPanel(props: Props): React.FunctionCompo
   return (
     <div className="container">
       {detailRequest ?
-        <OntologyDetailView 
+        <OntologyDetailView
           appContext={props.appContext}
           ontologyMeta={detailRequest}
           closeHandler={() => setDetailRequest(null)}/>
       :
         <>
           <OntologiesList
-            sysContext={props.sysContext} 
+            sysContext={props.sysContext}
             appContext={props.appContext}
             ontologies={ontologies}
             errorHandler={err => setErrorMessage(err)}
@@ -151,7 +158,7 @@ export default function CustomOntologiesPanel(props: Props): React.FunctionCompo
           </div>
           <div className="container mt-2">
             {!uploadFromUrlDialog && !uploadFromDiskDialog ?
-              renderAddButton()
+              renderAddButtons()
             : uploadFromDiskDialog ?
               renderUploadFromDiskDialog()
             : renderUploadFromUrlDialog()}

@@ -18,7 +18,7 @@ export const config: ConfRec = {
   widgetUrl: confRec?.widgetUrl ? confRec.widgetUrl : "http://localhost:3061/widget",
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
   solrUrl: confRec?.solrUrl ? confRec.solrUrl : "https://b2note.eudat.eu/solr/b2note_index/select",
-  imgPath: "/img/",
+  imgPath: "/app/img/",
   name: "B2NOTE Central UI",
   version: "v1.3.1",
   homepage: "https://b2note.bsc.es"

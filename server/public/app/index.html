@@ -4,6 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <title>B2Note Central UI</title>
 
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -25,7 +26,7 @@
     </div>
     <footer class="footer">
       <div class="text-muted pt-2" style="display: inline-block; font-size: 85%;">
-              EUDAT received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 654065. 
+              EUDAT received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 654065.
               <a href="http://www.eudat.eu/legal-notice" target="_blank">Legal Notice</a>
               <br>
               EOSC-Hub receives funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 777536.
@@ -33,7 +34,11 @@
       </div>
     </footer>
   </body>
+  <!-- For Electron -->
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.bundle.min.js"></script>
   <script src="js/app.js"></script>
+  <!-- For Electron -->
+  <script>if (window.module) module = window.module;</script>
 </html>

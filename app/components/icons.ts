@@ -1,6 +1,7 @@
 import * as icons from "react-icons/fa";
 
 export const AnnotateIcon = icons.FaEdit;
+export const CockpitIcon = icons.FaTachometerAlt;
 export const AnnotationsIcon = icons.FaList;
 export const SearchIcon = icons.FaSearch;
 export const HelpIcon = icons.FaQuestionCircle;

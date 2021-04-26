@@ -11,10 +11,10 @@ import * as icons from "app/components/icons";
 import { PagesEnum } from "app/pages/pages";
 import AuthProviderSelectionPage from "app/pages/login";
 import AnnotatorPage from "app/pages/annotator/view";
+import CockpitPage from "app/pages/cockpit/view";
 import ViewerPage from "app/pages/viewer/view";
 import AdministrationPage from "app/pages/administration/view";
 import ProfilePage from "app/pages/profile";
-import { stringify } from "uuid";
 
 enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
 
@@ -138,6 +138,7 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
             appContext={appContext}/>,
         [PagesEnum.VIEWER]: () =>
           <ViewerPage imageUrl={viewerParams[0]} svg={viewerParams[1]} />,
+        [PagesEnum.COCKPIT]: () => <CockpitPage sysContext={props.sysContext} appContext={appContext}/>,
         [PagesEnum.ADMIN]: () =>
           <AdministrationPage
             sysContext={props.sysContext}
@@ -159,6 +160,15 @@ function MainView(props: Props): React.FunctionComponentElement<Props> {
               <icons.AnnotateIcon/> Annotator
             </a>
           </li>
+          {appContext.mbUser && appContext.mbUser.profile.admin ?
+            <li className="nav-item">
+              <a
+                className={"nav-link" + activeFlag(PagesEnum.COCKPIT)} href="#"
+                onClick={() => setPage(PagesEnum.COCKPIT)}>
+                <icons.CockpitIcon/> Cockpit
+              </a>
+            </li>
+          : <></>}
           <li className="nav-item">
             <a
               className={"nav-link" + activeFlag(PagesEnum.ADMIN)} href="#"
